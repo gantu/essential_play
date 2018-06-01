@@ -12,7 +12,13 @@ object CurrencyController extends Controller with ExchangeRateHelpers {
       //  - Convert fromAmount to USD using ExchangeRateHelpers.toUSD
       //  - Convert the USD amount to toCurrency using ExchangeRateHelpers.fromUSD
       //  - Format the result using formatConversion
-      ???
+      
+      val output:Future[String] = for{
+        usd <- toUSD(fromAmount,fromCurrency)
+        expectedAmount <- fromUSD(usd, toCurrency)
+      } yield formatConversion(fromAmount,fromCurrency,expectedAmount,toCurrency)
+
+      output.map(Ok(_))
     }
 
   def convertAll(fromAmount: Double, fromCurrency: Currency) =
@@ -23,7 +29,14 @@ object CurrencyController extends Controller with ExchangeRateHelpers {
       //     - Convert the USD amount to toCurrency using ExchangeRateHelpers.fromUSD
       //     - Format the result using formatConversion
       //  - Combine all results into a single plain text response
-      ???
+      val ouptut:Seq[Future[String]] = currencies.map{ toCurrency:Currency =>
+        for{
+          usdAmount <- toUSD(fromAmount,fromCurrency)
+          toAmount <- fromUSD(usdAmount,toCurrency)
+        } yield formatConversion(fromAmount,fromCurrency,toAmount,toCurrency)
+      }
+
+      Future.sequence(ouptut).map(lines => Ok(lines mkString "\n"))
     }
 }
 

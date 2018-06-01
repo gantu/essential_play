@@ -1,28 +1,39 @@
 package controllers
 
-import java.util.Date
-import org.joda.time.{DateTime, DateTimeZone}
-import org.joda.time.format.DateTimeFormat
 import play.api._
 import play.api.mvc._
+import play.api.data.Forms._
+import play.api.data._
 
-object TimeController extends Controller with TimeHelpers {
+import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.format.DateTimeFormat
+import javax.inject._
+
+@Singleton
+class TimeController @Inject()(cc:ControllerComponents) extends AbstractController(cc) with TimeHelpers {
   // TODO: Return an HTTP 200 plain text response containing the time.
   //
   // Use the `localTime` and `timeToString` helper methods below.
-  def time = ???
+  def time = Action{request=>
+    Ok(timeToString(localTime))
+  }
 
   // TODO: Read in a time zone ID (a string) and return an HTTP 200
   // plain text response containing the localized time.
   //
   // Use the `localTimeInZone` and `timeToString` helper methods below.
-  def timeIn(zoneId: String) = ???
+  def timeIn(zoneId: String) = Action{request=>
+    val time = localTimeInZone(zoneId)
+    Ok(time map timeToString getOrElse "Time zone not recognized")
+  }
 
   // TODO: Return an HTTP 200 plain text response containing a list of
   // available time zone codes.
   //
   // Use the `zoneIds` helper method below.
-  def zones = ???
+  def zones = Action{request =>
+    Ok(zoneIds mkString "\n")
+  }
 }
 
 trait TimeHelpers {
